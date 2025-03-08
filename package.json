@@ -1,0 +1,27 @@
+{
+  "name": "science-news-analyser",
+  "version": "1.0.0",
+  "description": "Creating a website and chrome add-on to automatically analyse the quality and veracity of science and health news.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/isaacchesters/science-news-analyser.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/isaacchesters/science-news-analyser/issues"
+  },
+  "homepage": "https://github.com/isaacchesters/science-news-analyser#readme",
+  "dependencies": {
+    "next": "^15.2.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}
