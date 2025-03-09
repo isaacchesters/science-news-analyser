@@ -171,6 +171,10 @@ footer p {
 }
 
 /* Assessment Header styles */
+.assessment-header {
+  padding-bottom: 2rem;
+}
+
 .assessment-header h2 {
   margin-top: 0;
   text-align: center;
@@ -179,7 +183,7 @@ footer p {
 }
 
 .content-type {
-  margin: 1rem 0;
+  margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -197,23 +201,81 @@ footer p {
   font-weight: 500;
 }
 
-.grades {
-  margin: 1.5rem 0;
+/* Scientific Validity Section */
+.scientific-validity {
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
-.grade-row {
+.scientific-validity h2 {
+  margin-bottom: 1rem;
+  font-size: 1.6rem;
+}
+
+.validity-grade {
+  display: inline-flex;
+  align-items: center;
+  background-color: #f8f9fa;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.validity-grade .grade {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-right: 1rem;
+}
+
+.validity-grade .label {
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.validity-explanation {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  text-align: left;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+.validity-explanation p {
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Grade Component Styles */
+.grade-components {
+  margin-top: 2rem;
+}
+
+.grade-components h3 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.component {
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.component-header {
   display: flex;
   align-items: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
-.grade-label {
-  flex: 0 0 180px;
+.component-name {
+  flex: 1;
   font-weight: bold;
-  color: #555;
+  font-size: 1.1rem;
 }
 
-.grade-value {
+.component-grade {
   font-weight: bold;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
@@ -222,23 +284,28 @@ footer p {
   text-align: center;
 }
 
+.component-explanation {
+  margin: 0;
+  color: #555;
+}
+
 /* Grade color coding */
-.grade-a\+, .grade-a, .grade-a- {
+.grade-a {
   background-color: #e8f5e9;
   color: #2e7d32;
 }
 
-.grade-b\+, .grade-b, .grade-b- {
+.grade-b {
   background-color: #fffde7;
   color: #fbc02d;
 }
 
-.grade-c\+, .grade-c, .grade-c- {
+.grade-c {
   background-color: #fff3e0;
   color: #ef6c00;
 }
 
-.grade-d\+, .grade-d, .grade-d-, .grade-f {
+.grade-f, .grade-d {
   background-color: #ffebee;
   color: #c62828;
 }
@@ -264,24 +331,12 @@ footer p {
   color: #ccc;
 }
 
-.summary {
-  background-color: #f8f9fa;
-  padding: 1rem;
-  border-radius: 4px;
-  margin-top: 1rem;
-}
-
-.summary p {
-  margin: 0;
-  font-weight: 500;
-}
-
 /* Source Info styles */
 .info-grid {
   display: grid;
   grid-template-columns: auto 1fr;
   grid-gap: 0.75rem 1rem;
-  align-items: center;
+  align-items: start;
 }
 
 .info-label {
@@ -289,9 +344,54 @@ footer p {
   color: #555;
 }
 
+.view-sources-btn {
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.8rem;
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.research-papers-list {
+  margin-top: 0.75rem;
+  padding-left: 1.5rem;
+}
+
+.research-papers-list li {
+  margin-bottom: 0.5rem;
+}
+
+.paper-access {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.no-research {
+  color: #f57c00;
+  font-weight: 500;
+}
+
+.content-basis {
+  margin-top: 0.5rem;
+  font-weight: normal;
+  color: #555;
+  font-size: 0.95rem;
+}
+
 /* Key Takeaways styles */
 .takeaway {
   margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.takeaway:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .takeaway h3 {
@@ -323,12 +423,16 @@ footer p {
   border-left: 4px solid #ddd;
 }
 
-.claim-accurately-reported {
+.claim:last-child {
+  margin-bottom: 0;
+}
+
+.claim-accurate {
   background-color: #f1f8e9;
   border-left-color: #7cb342;
 }
 
-.claim-partially-accurate {
+.claim-partial {
   background-color: #fffde7;
   border-left-color: #ffca28;
 }
@@ -338,7 +442,7 @@ footer p {
   border-left-color: #ff9800;
 }
 
-.claim-incorrect {
+.claim-unsupported {
   background-color: #ffebee;
   border-left-color: #e53935;
 }
@@ -366,6 +470,10 @@ footer p {
   color: #555;
 }
 
+.assessment-value {
+  font-weight: 500;
+}
+
 /* Scientific Context styles */
 .context-content {
   margin-top: 1rem;
@@ -375,36 +483,14 @@ footer p {
   margin-bottom: 1.5rem;
 }
 
-.research-quality-list {
-  list-style-type: none;
-  padding: 0;
-  margin: 0.5rem 0;
-}
-
-.research-quality-list li {
-  margin-bottom: 0.5rem;
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.quality-label {
-  flex: 0 0 140px;
-  font-weight: bold;
-  color: #555;
-}
-
-/* Detailed Grades styles */
-.detailed-grades-content {
-  margin-top: 1rem;
-}
-
-.grade-detail {
-  margin-bottom: 1.5rem;
+.context-section:last-child {
+  margin-bottom: 0;
 }
 
 /* Additional Resources styles */
 .resources-list {
   padding-left: 1.5rem;
+  margin: 1rem 0 0 0;
 }
 
 .resources-list li {
@@ -485,17 +571,34 @@ footer p {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .grade-row, .info-grid, .research-quality-list li {
-    flex-direction: column;
-    align-items: flex-start;
+  .component-header {
+    flex-wrap: wrap;
   }
   
-  .grade-label, .quality-label {
+  .component-name {
+    margin-bottom: 0.5rem;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .info-label {
     margin-bottom: 0.25rem;
   }
   
   .feedback-buttons {
     flex-direction: column;
     gap: 0.5rem;
+  }
+  
+  .validity-grade {
+    flex-direction: column;
+    padding: 1rem;
+  }
+  
+  .validity-grade .grade {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
   }
 }

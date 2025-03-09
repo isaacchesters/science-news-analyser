@@ -17,7 +17,7 @@ export default function Results() {
   const [expandedSections, setExpandedSections] = useState({
     claims: false,
     scientific: false,
-    detailedGrades: false,
+    resources: false,
     methodology: false
   });
 
@@ -78,8 +78,22 @@ export default function Results() {
     return null;
   }
 
+  // Helper function to get grade color class
+  const getGradeColorClass = (grade) => {
+    if (!grade) return '';
+    
+    const firstChar = grade.charAt(0).toLowerCase();
+    if (firstChar === 'a') return 'grade-a';
+    if (firstChar === 'b') return 'grade-b';
+    if (firstChar === 'c') return 'grade-c';
+    if (firstChar === 'd' || firstChar === 'f') return 'grade-f';
+    return '';
+  };
+
   // Helper function to render rating dots
   const renderRatingDots = (grade) => {
+    if (!grade) return null;
+    
     const gradeToNumber = {
       'A+': 5, 'A': 4.7, 'A-': 4.3,
       'B+': 4, 'B': 3.7, 'B-': 3.3,
@@ -100,6 +114,136 @@ export default function Results() {
         {[...Array(emptyDots)].map((_, i) => <span key={`empty-${i}`} className="dot empty">○</span>)}
       </span>
     );
+  };
+
+  // Helper function to render research sources based on type
+  const renderResearchSources = (source) => {
+    if (!source) return null;
+
+    if (source.researchType === 'singleStudy' && source.researchPaper) {
+      return (
+        <>
+          <div className="info-row">
+            <span className="info-label">Research Source:</span>
+            <span className="info-value">{source.researchPaper.citation}</span>
+          </div>
+          <div className="info-row">
+            <span className="info-label">Paper Accessibility:</span>
+            <span className="info-value">{source.researchPaper.accessibility}</span>
+          </div>
+        </>
+      );
+    }
+    
+    if (source.researchType === 'multipleStudies' && source.researchPapers) {
+      return (
+        <div className="info-row">
+          <span className="info-label">Research Sources:</span>
+          <span className="info-value">
+            Multiple Research Sources ({source.researchCount})
+            <button 
+              className="view-sources-btn"
+              onClick={() => toggleSection('sources')}
+            >
+              {expandedSections.sources ? 'Hide Sources' : 'View Sources'}
+            </button>
+            
+            {expandedSections.sources && (
+              <ul className="research-papers-list">
+                {source.researchPapers.map((paper, index) => (
+                  <li key={index}>
+                    <div>{paper.citation}</div>
+                    <div className="paper-access">
+                      Accessibility: {paper.accessibility}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </span>
+        </div>
+      );
+    }
+    
+    if (source.researchType === 'noSpecificResearch') {
+      return (
+        <div className="info-row">
+          <span className="info-label">Research Sources:</span>
+          <span className="info-value no-research">
+            No specific research cited
+            <div className="content-basis">{source.contentBasis}</div>
+          </span>
+        </div>
+      );
+    }
+    
+    return null;
+  };
+
+  // Helper function to render scientific context based on research type
+  const renderScientificContext = (context) => {
+    if (!context) return null;
+
+    if (context.researchType === 'singleStudy') {
+      return (
+        <>
+          <div className="context-section">
+            <h3>Research Summary:</h3>
+            <p>{context.researchSummary}</p>
+          </div>
+          <div className="context-section">
+            <h3>Study Limitations:</h3>
+            <p>{context.limitations}</p>
+          </div>
+          {context.conflicts && (
+            <div className="context-section">
+              <h3>Conflicts of Interest:</h3>
+              <p>{context.conflicts}</p>
+            </div>
+          )}
+        </>
+      );
+    }
+    
+    if (context.researchType === 'multipleStudies') {
+      return (
+        <>
+          <div className="context-section">
+            <h3>Scientific Consensus:</h3>
+            <p>{context.consensusStatement}</p>
+          </div>
+          <div className="context-section">
+            <h3>Strength of Evidence:</h3>
+            <p>{context.strengthOfEvidence}</p>
+          </div>
+          <div className="context-section">
+            <h3>Areas of Uncertainty:</h3>
+            <p>{context.areasOfUncertainty}</p>
+          </div>
+        </>
+      );
+    }
+    
+    if (context.researchType === 'noSpecificResearch') {
+      return (
+        <>
+          <div className="context-section">
+            <h3>Field Summary:</h3>
+            <p>{context.fieldSummary}</p>
+          </div>
+          <div className="context-section">
+            <h3>Current State of Knowledge:</h3>
+            <p>{context.stateOfKnowledge}</p>
+          </div>
+          <div className="context-section">
+            <h3>Limitations of This Analysis:</h3>
+            <p>{context.limitations}</p>
+          </div>
+        </>
+      );
+    }
+    
+    return null;
   };
 
   return (
@@ -153,41 +297,57 @@ export default function Results() {
           <div className="results-wrapper">
             {/* 1. Assessment Header */}
             <div className="assessment-header card">
-              <h2>SCIENCE NEWS ASSESSMENT</h2>
-              
               <div className="content-type">
                 <span className="label">Content Type:</span>
                 <span className="value">{analysis.contentType}</span>
               </div>
               
-              <div className="grades">
-                <div className="grade-row">
-                  <span className="grade-label">Reporting Quality:</span>
-                  <span className={`grade-value grade-${analysis.grades.reporting.toLowerCase()}`}>
-                    {analysis.grades.reporting}
-                  </span>
-                  {renderRatingDots(analysis.grades.reporting)}
+              <div className="scientific-validity">
+                <h2>SCIENTIFIC VALIDITY</h2>
+                <div className={`validity-grade ${getGradeColorClass(analysis.scientificValidity.grade)}`}>
+                  <span className="grade">{analysis.scientificValidity.grade}</span>
+                  <span className="label">{analysis.scientificValidity.label}</span>
                 </div>
-                
-                <div className="grade-row">
-                  <span className="grade-label">Scientific Validity:</span>
-                  <span className={`grade-value grade-${analysis.grades.scientific.toLowerCase()}`}>
-                    {analysis.grades.scientific}
-                  </span>
-                  {renderRatingDots(analysis.grades.scientific)}
-                </div>
-                
-                <div className="grade-row">
-                  <span className="grade-label">Context & Completeness:</span>
-                  <span className={`grade-value grade-${analysis.grades.context.toLowerCase()}`}>
-                    {analysis.grades.context}
-                  </span>
-                  {renderRatingDots(analysis.grades.context)}
+                <div className="validity-explanation">
+                  <p>{analysis.scientificValidity.explanation}</p>
                 </div>
               </div>
               
-              <div className="summary">
-                <p>{analysis.summary}</p>
+              <div className="grade-components">
+                <h3>ASSESSMENT COMPONENTS</h3>
+                
+                <div className="component">
+                  <div className="component-header">
+                    <span className="component-name">Research Evidence</span>
+                    <span className={`component-grade ${getGradeColorClass(analysis.gradeComponents.researchEvidence.grade)}`}>
+                      {analysis.gradeComponents.researchEvidence.grade}
+                    </span>
+                    {renderRatingDots(analysis.gradeComponents.researchEvidence.grade)}
+                  </div>
+                  <p className="component-explanation">{analysis.gradeComponents.researchEvidence.explanation}</p>
+                </div>
+                
+                <div className="component">
+                  <div className="component-header">
+                    <span className="component-name">Article Accuracy</span>
+                    <span className={`component-grade ${getGradeColorClass(analysis.gradeComponents.articleAccuracy.grade)}`}>
+                      {analysis.gradeComponents.articleAccuracy.grade}
+                    </span>
+                    {renderRatingDots(analysis.gradeComponents.articleAccuracy.grade)}
+                  </div>
+                  <p className="component-explanation">{analysis.gradeComponents.articleAccuracy.explanation}</p>
+                </div>
+                
+                <div className="component">
+                  <div className="component-header">
+                    <span className="component-name">Broader Context</span>
+                    <span className={`component-grade ${getGradeColorClass(analysis.gradeComponents.broaderContext.grade)}`}>
+                      {analysis.gradeComponents.broaderContext.grade}
+                    </span>
+                    {renderRatingDots(analysis.gradeComponents.broaderContext.grade)}
+                  </div>
+                  <p className="component-explanation">{analysis.gradeComponents.broaderContext.explanation}</p>
+                </div>
               </div>
             </div>
             
@@ -213,19 +373,7 @@ export default function Results() {
                   </div>
                 )}
                 
-                {analysis.source.researchPaper && (
-                  <>
-                    <div className="info-row">
-                      <span className="info-label">Research Source:</span>
-                      <span className="info-value">{analysis.source.researchPaper}</span>
-                    </div>
-                    
-                    <div className="info-row">
-                      <span className="info-label">Paper Accessibility:</span>
-                      <span className="info-value">{analysis.source.accessibility}</span>
-                    </div>
-                  </>
-                )}
+                {renderResearchSources(analysis.source)}
               </div>
             </div>
             
@@ -235,154 +383,103 @@ export default function Results() {
               
               <div className="takeaway">
                 <h3>Bottom Line:</h3>
-                <p>{analysis.takeaways.bottomLine}</p>
+                <p>{analysis.keyTakeaways.bottomLine}</p>
               </div>
               
               <div className="takeaway">
-                <h3>Reality Check:</h3>
-                <p>{analysis.takeaways.realityCheck}</p>
+                <h3>Context for Readers:</h3>
+                <p>{analysis.keyTakeaways.contextForReaders}</p>
               </div>
               
               <div className="takeaway">
-                <h3>Practical Relevance:</h3>
-                <p>{analysis.takeaways.practicalRelevance}</p>
+                <h3>Practical Significance:</h3>
+                <p>{analysis.keyTakeaways.practicalSignificance}</p>
               </div>
             </div>
             
             {/* 4. Claims Assessment (Expandable) */}
-            <div className="claims-assessment card">
-              <h2 onClick={() => toggleSection('claims')} className="expandable">
-                CLAIMS ASSESSMENT
-                <span className="toggle-icon">
-                  {expandedSections.claims ? '▼' : '▶'}
-                </span>
-              </h2>
-              
-              {expandedSections.claims && analysis.claims && (
-                <div className="claims-content">
-                  {analysis.claims.map((claim, index) => (
-                    <div key={index} className={`claim claim-${claim.rating.toLowerCase().replace(' ', '-')}`}>
-                      <p className="claim-text">"{claim.text}"</p>
-                      <div className="claim-assessment">
-                        <div className="assessment-row">
-                          <span className="assessment-label">Rating:</span>
-                          <span className="assessment-value">{claim.rating}</span>
+            {analysis.claims && analysis.claims.length > 0 && (
+              <div className="claims-assessment card">
+                <h2 onClick={() => toggleSection('claims')} className="expandable">
+                  CLAIMS ASSESSMENT
+                  <span className="toggle-icon">
+                    {expandedSections.claims ? '▼' : '▶'}
+                  </span>
+                </h2>
+                
+                {expandedSections.claims && (
+                  <div className="claims-content">
+                    {analysis.claims.map((claim, index) => {
+                      // Determine claim class based on rating
+                      let claimClass = 'claim-default';
+                      const rating = claim.rating.toLowerCase().replace(/\s+/g, '-');
+                      if (rating.includes('accurate')) claimClass = 'claim-accurate';
+                      else if (rating.includes('partially')) claimClass = 'claim-partial';
+                      else if (rating.includes('misleading')) claimClass = 'claim-misleading';
+                      else if (rating.includes('unsupported') || rating.includes('incorrect')) claimClass = 'claim-unsupported';
+                      
+                      return (
+                        <div key={index} className={`claim ${claimClass}`}>
+                          <p className="claim-text">"{claim.text}"</p>
+                          <div className="claim-assessment">
+                            <div className="assessment-row">
+                              <span className="assessment-label">Rating:</span>
+                              <span className="assessment-value">{claim.rating}</span>
+                            </div>
+                          </div>
+                          <p className="claim-explanation">{claim.explanation}</p>
                         </div>
-                        <div className="assessment-row">
-                          <span className="assessment-label">Evidence Quality:</span>
-                          <span className="assessment-value">{claim.evidenceQuality}</span>
-                        </div>
-                      </div>
-                      <p className="claim-explanation">{claim.explanation}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
             
             {/* 5. Scientific Context (Expandable) */}
-            <div className="scientific-context card">
-              <h2 onClick={() => toggleSection('scientific')} className="expandable">
-                SCIENTIFIC CONTEXT
-                <span className="toggle-icon">
-                  {expandedSections.scientific ? '▼' : '▶'}
-                </span>
-              </h2>
-              
-              {expandedSections.scientific && (
-                <div className="context-content">
-                  {analysis.scientific.researchSummary && (
-                    <div className="context-section">
-                      <h3>Research Summary:</h3>
-                      <p>{analysis.scientific.researchSummary}</p>
-                    </div>
-                  )}
-                  
-                  <div className="context-section">
-                    <h3>Scientific Consensus:</h3>
-                    <p>{analysis.scientific.consensus}</p>
+            {analysis.scientificContext && (
+              <div className="scientific-context card">
+                <h2 onClick={() => toggleSection('scientific')} className="expandable">
+                  SCIENTIFIC CONTEXT
+                  <span className="toggle-icon">
+                    {expandedSections.scientific ? '▼' : '▶'}
+                  </span>
+                </h2>
+                
+                {expandedSections.scientific && (
+                  <div className="context-content">
+                    {renderScientificContext(analysis.scientificContext)}
                   </div>
-                  
-                  {analysis.scientific.researchQuality && (
-                    <div className="context-section">
-                      <h3>Research Quality:</h3>
-                      <ul className="research-quality-list">
-                        <li>
-                          <span className="quality-label">Study Design:</span>
-                          <span className="quality-value">{analysis.scientific.researchQuality.design}</span>
-                        </li>
-                        <li>
-                          <span className="quality-label">Sample Size:</span>
-                          <span className="quality-value">{analysis.scientific.researchQuality.sampleSize}</span>
-                        </li>
-                        <li>
-                          <span className="quality-label">Key Limitations:</span>
-                          <span className="quality-value">{analysis.scientific.researchQuality.limitations}</span>
-                        </li>
-                        {analysis.scientific.researchQuality.conflicts && (
-                          <li>
-                            <span className="quality-label">Conflicts of Interest:</span>
-                            <span className="quality-value">{analysis.scientific.researchQuality.conflicts}</span>
-                          </li>
-                        )}
-                      </ul>
-                    </div>
-                  )}
-                  
-                  <div className="context-section">
-                    <h3>Missing Context:</h3>
-                    <p>{analysis.scientific.missingContext}</p>
-                  </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
             
-            {/* 6. Detailed Grade Explanation (Expandable) */}
-            <div className="detailed-grades card">
-              <h2 onClick={() => toggleSection('detailedGrades')} className="expandable">
-                DETAILED ASSESSMENT
-                <span className="toggle-icon">
-                  {expandedSections.detailedGrades ? '▼' : '▶'}
-                </span>
-              </h2>
-              
-              {expandedSections.detailedGrades && (
-                <div className="detailed-grades-content">
-                  <div className="grade-detail">
-                    <h3>Reporting Quality: {analysis.grades.reporting}</h3>
-                    <p>{analysis.detailedGrades.reporting}</p>
-                  </div>
-                  
-                  <div className="grade-detail">
-                    <h3>Scientific Validity: {analysis.grades.scientific}</h3>
-                    <p>{analysis.detailedGrades.scientific}</p>
-                  </div>
-                  
-                  <div className="grade-detail">
-                    <h3>Context & Completeness: {analysis.grades.context}</h3>
-                    <p>{analysis.detailedGrades.context}</p>
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* 6. Additional Resources */}
+            {analysis.additionalResources && analysis.additionalResources.length > 0 && (
+              <div className="additional-resources card">
+                <h2 onClick={() => toggleSection('resources')} className="expandable">
+                  ADDITIONAL RESOURCES
+                  <span className="toggle-icon">
+                    {expandedSections.resources ? '▼' : '▶'}
+                  </span>
+                </h2>
+                
+                {expandedSections.resources && (
+                  <ul className="resources-list">
+                    {analysis.additionalResources.map((resource, index) => (
+                      <li key={index}>
+                        <a href={resource.url} target="_blank" rel="noopener noreferrer">
+                          {resource.title}
+                        </a>
+                        {resource.description && <p className="resource-description">{resource.description}</p>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
             
-            {/* 7. Additional Resources */}
-            <div className="additional-resources card">
-              <h2>ADDITIONAL RESOURCES</h2>
-              
-              <ul className="resources-list">
-                {analysis.resources.map((resource, index) => (
-                  <li key={index}>
-                    <a href={resource.url} target="_blank" rel="noopener noreferrer">
-                      {resource.title}
-                    </a>
-                    {resource.description && <p className="resource-description">{resource.description}</p>}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            {/* 8. Analysis Methodology & Feedback */}
+            {/* 7. Analysis Methodology & Feedback */}
             <div className="analysis-methodology card">
               <h2 onClick={() => toggleSection('methodology')} className="expandable">
                 ABOUT THIS ANALYSIS
@@ -396,8 +493,8 @@ export default function Results() {
                   <p>
                     This analysis was conducted using a combination of AI-assisted evaluation 
                     and scientific knowledge accessed on {analysis.analysisDate}. The assessment 
-                    evaluates the article based on reporting accuracy, scientific validity, 
-                    and contextual completeness.
+                    evaluates the article based on scientific validity, evidence quality, and 
+                    contextual completeness.
                   </p>
                   
                   <p>
