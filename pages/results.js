@@ -5,13 +5,14 @@ import Link from 'next/link';
 
 export default function Results() {
   const router = useRouter();
-  const { url } = router.query;
+  const { url, type, imageId } = router.query;
   
   // States for analysis data and UI
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isIrrelevant, setIsIrrelevant] = useState(false);
+  const [analysisSource, setAnalysisSource] = useState('url'); // 'url' or 'screenshot'
   
   // States for expandable sections
   const [expandedSections, setExpandedSections] = useState({
@@ -30,37 +31,73 @@ export default function Results() {
   };
 
   useEffect(() => {
-    // Only run this effect when we have a URL from the query parameters
-    if (!url) return;
+    // Determine if we're analyzing a URL or a screenshot
+    if (type === 'screenshot') {
+      setAnalysisSource('screenshot');
+    } else {
+      setAnalysisSource('url');
+    }
+  }, [type]);
+
+  useEffect(() => {
+    // Only run this effect when we have query parameters
+    if (!router.isReady) return;
     
     const fetchAnalysis = async () => {
       try {
-        const decodedUrl = decodeURIComponent(url);
-        
-        // Call our API route to analyze the URL
-        const response = await fetch('/api/analyze', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ url: decodedUrl }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
+        // Different handling based on analysis type
+        if (analysisSource === 'url' && url) {
+          const decodedUrl = decodeURIComponent(url);
           
-          // Handle specific error types
-          if (errorData.type === 'IRRELEVANT_CONTENT') {
-            setError(errorData.message);
-            setIsIrrelevant(true);
-          } else {
-            throw new Error(errorData.message || 'Failed to analyze article');
-          }
-          return;
-        }
+          // Call our API route to analyze the URL
+          const response = await fetch('/api/analyze', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url: decodedUrl }),
+          });
 
-        const data = await response.json();
-        setAnalysis(data);
+          if (!response.ok) {
+            const errorData = await response.json();
+            
+            // Handle specific error types
+            if (errorData.type === 'IRRELEVANT_CONTENT') {
+              setError(errorData.message);
+              setIsIrrelevant(true);
+            } else {
+              throw new Error(errorData.message || 'Failed to analyze article');
+            }
+            return;
+          }
+
+          const data = await response.json();
+          setAnalysis(data);
+        } 
+        else if (analysisSource === 'screenshot' && imageId) {
+          // For now, we'll use the mock API to simulate screenshot analysis
+          // In a real implementation, you would upload the image from the home page
+          // and get a real image ID
+          
+          const response = await fetch('/api/analyze-screenshot', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ imageId }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to analyze screenshot');
+          }
+
+          const data = await response.json();
+          setAnalysis(data);
+        }
+        else {
+          throw new Error('Invalid analysis request');
+        }
       } catch (err) {
         console.error('Analysis error:', err);
         setError(err.message);
@@ -70,10 +107,10 @@ export default function Results() {
     };
 
     fetchAnalysis();
-  }, [url]);
+  }, [router.isReady, url, imageId, analysisSource]);
 
-  // Redirect if no URL is provided
-  if (!url && typeof window !== 'undefined') {
+  // Redirect if no valid parameters are provided
+  if (router.isReady && !url && !imageId && typeof window !== 'undefined') {
     router.push('/');
     return null;
   }
@@ -258,7 +295,7 @@ export default function Results() {
         
         {loading && (
           <div className="loading-container">
-            <p>Analyzing article...</p>
+            <p>Analyzing {analysisSource === 'url' ? 'article' : 'screenshot'}...</p>
             <p>This may take a minute as we retrieve and analyze the content.</p>
             <div className="loading-animation">
               <div className="spinner"></div>
@@ -295,6 +332,16 @@ export default function Results() {
         
         {analysis && (
           <div className="results-wrapper">
+            {/* For screenshot analysis, show the extracted text */}
+            {analysisSource === 'screenshot' && analysis.extractedText && (
+              <div className="extracted-text card">
+                <h2>EXTRACTED TEXT</h2>
+                <div className="text-content">
+                  <p>{analysis.extractedText}</p>
+                </div>
+              </div>
+            )}
+            
             {/* 1. Assessment Header */}
             <div className="assessment-header card">
               <div className="content-type">
@@ -493,8 +540,8 @@ export default function Results() {
                   <p>
                     This analysis was conducted using a combination of AI-assisted evaluation 
                     and scientific knowledge accessed on {analysis.analysisDate}. The assessment 
-                    evaluates the article based on scientific validity, evidence quality, and 
-                    contextual completeness.
+                    evaluates the {analysisSource === 'url' ? 'article' : 'content'} based on scientific 
+                    validity, evidence quality, and contextual completeness.
                   </p>
                   
                   <p>
@@ -525,6 +572,46 @@ export default function Results() {
       <footer>
         <p>Science News Analysis Tool - Beta Version</p>
       </footer>
+
+      <style jsx>{`
+        .extracted-text {
+          margin-bottom: 1rem;
+        }
+        
+        .text-content {
+          background-color: #f8f9fa;
+          padding: 1rem;
+          border-radius: 4px;
+          border-left: 4px solid #0070f3;
+          font-style: italic;
+        }
+        
+        .tabs {
+          display: flex;
+          margin-bottom: 1.5rem;
+          border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+          padding: 0.75rem 1.5rem;
+          background: none;
+          border: none;
+          border-bottom: 3px solid transparent;
+          cursor: pointer;
+          font-weight: 500;
+          color: #555;
+          transition: all 0.2s;
+        }
+        
+        .tab.active {
+          color: #0070f3;
+          border-bottom: 3px solid #0070f3;
+        }
+        
+        .tab:hover:not(.active) {
+          background-color: #f5f5f5;
+        }
+      `}</style>
     </div>
   );
 }
